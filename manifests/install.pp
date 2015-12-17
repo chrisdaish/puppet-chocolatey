@@ -2,10 +2,14 @@
 class chocolatey::install {
   assert_private()
 
-  $download_url = $::chocolatey::chocolatey_download_url
-  $unzip_type   = $::chocolatey::use_7zip ? {
-    true      => '7zip',
-    default   => 'windows'
+  $download_url   = $::chocolatey::chocolatey_download_url
+  $proxy_server   = $::chocolatey::proxy_server
+  $proxy_port     = $::chocolatey::proxy_port
+  $proxy_username = $::chocolatey::proxy_username
+  $proxy_password = $::chocolatey::proxy_password
+  $unzip_type     = $::chocolatey::use_7zip ? {
+    true    => '7zip',
+    default => 'windows'
   }
 
   # These are specifically necessary to ensure that we know the path
@@ -32,6 +36,6 @@ class chocolatey::install {
     provider    => powershell,
     timeout     => $::chocolatey::choco_install_timeout_seconds,
     logoutput   => $::chocolatey::log_output,
-    environment => ["ChocolateyInstall=${::chocolatey::choco_install_location}"]
+    environment => ["ChocolateyInstall=${::chocolatey::choco_install_location}"],
   }
 }

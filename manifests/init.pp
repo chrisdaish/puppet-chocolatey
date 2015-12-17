@@ -63,7 +63,11 @@ class chocolatey (
   $choco_install_timeout_seconds  = $::chocolatey::params::install_timeout_seconds,
   $chocolatey_download_url        = $::chocolatey::params::download_url,
   $enable_autouninstaller         = $::chocolatey::params::enable_autouninstaller,
-  $log_output                     = false
+  $log_output                     = false,
+  $proxy_server                   = undef,
+  $proxy_port                     = undef,
+  $proxy_username                 = undef,
+  $proxy_password                 = undef
 ) inherits ::chocolatey::params {
 
   validate_re($chocolatey_download_url,['^http\:\/\/','^https\:\/\/','file\:\/\/\/'],
@@ -76,6 +80,25 @@ class chocolatey (
   )
   validate_integer($choco_install_timeout_seconds)
   validate_bool($enable_autouninstaller)
+  validate_string($proxy_server)
+  validate_string($proxy_username)
+  validate_string($proxy_password)
+
+  if $proxy_port {
+    validate_integer($proxy_port)
+  }
+
+  if $proxy_server or $proxy_port {
+    if ( ! $proxy_server) or ( ! $proxy_port) {
+      fail('Both proxy_port and proxy_server must be defined!')
+    }
+  }
+
+  if $proxy_username or $proxy_password {
+    if ( ! $proxy_password) or ( ! $proxy_username) or ( ! $proxy_server) {
+      fail('If proxy username or password is specified, all proxy settings must be defined!')
+    }
+  }
 
   if (versioncmp($::serverversion, '3.4.0') >= 0) or (versioncmp($::clientversion, '3.4.0') >= 0) {
     class { '::chocolatey::install': } ->
